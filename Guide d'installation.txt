@@ -1,0 +1,6 @@
+Guide d’installation du plugin Visibilité-Choucas compatible avec la version 3.4
+1.	Copier le répertoire « C:\Users\non_de_votre_session\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\ »
+2.	Lancer Qgis 3.4
+3.	Créer votre point de vue un seul à la fois
+4.	Penser à limité la distance du Radius à moins 25 km soit à la valeur de 25000 m
+5.	Si vous ne voulez pas conserver le DBH décochez la case « ouvrir le fichier en sortie
