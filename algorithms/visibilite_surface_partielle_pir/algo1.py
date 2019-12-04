@@ -30,12 +30,19 @@ __copyright__ = '(C) 2019 by Charles d\'Andigne et Amina Barmani, ENSG, IGN, LaS
 
 __revision__ = '$Format:%H$'
 
-from qgis.PyQt.QtCore import QCoreApplication
+
+import random
+from qgis.PyQt.QtCore import (QCoreApplication,QVariant)
 from qgis.core import (QgsProcessing,
                        QgsFeatureSink,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFeatureSource,
-                       QgsProcessingParameterFeatureSink)
+                       QgsProcessingParameterFeatureSink,
+                       QgsProcessingParameterNumber,
+                       QgsFeature,
+                       QgsField,
+                       QgsFields,
+                       QgsWkbTypes)
 
 
 class Algo1(QgsProcessingAlgorithm):
@@ -58,6 +65,7 @@ class Algo1(QgsProcessingAlgorithm):
 
     OUTPUT = 'OUTPUT'
     INPUT = 'INPUT'
+    INPUT_COUNT='INPUT_COUNT'
 
     def initAlgorithm(self, config):
         """
@@ -74,7 +82,11 @@ class Algo1(QgsProcessingAlgorithm):
                 [QgsProcessing.TypeVectorAnyGeometry]
             )
         )
-
+        #ajouter input count
+        self.addParameter(QgsProcessingParameterNumber(
+            self.INPUT_COUNT,
+            "Nombre de points",
+            QgsProcessingParameterNumber.Integer, 3))
         # We add a feature sink in which to store our processed features (this
         # usually takes the form of a newly created vector layer when the
         # algorithm is run in QGIS).
@@ -94,13 +106,18 @@ class Algo1(QgsProcessingAlgorithm):
         # to uniquely identify the feature sink, and must be included in the
         # dictionary returned by the processAlgorithm function.
         source = self.parameterAsSource(parameters, self.INPUT, context)
+        count = self.parameterAsInt(parameters, self.INPUT_COUNT, context)
+        # La couche de sortie est une couche multipoint avec un champ ID
+        output_fields = QgsFields()
+        output_fields.append(QgsField("ID", QVariant.Int))
         (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
-                context, source.fields(), source.wkbType(), source.sourceCrs())
+                context, output_fields , QgsWkbTypes.MultiPoint , source.sourceCrs())
 
         # Compute the number of steps to display within the progress bar and
         # get features from source
         total = 100.0 / source.featureCount() if source.featureCount() else 0
         features = source.getFeatures()
+        output_id=0
 
         for current, feature in enumerate(features):
             # Stop the algorithm if cancel button has been clicked
@@ -112,10 +129,37 @@ class Algo1(QgsProcessingAlgorithm):
             # Il faudra alors remplacer dans la ligne ci-dessous la variable "feature"
             # par la variable contenant l'objet en sortie
             # Pour l'instant on met juste un petit message pour dire qu'on passe par là
-            print('Ici un jour l\'Algo1 fera qqch de pertinent. Pour l\'instant, il se contente de renvoyer une copie de la couche vectorielle en entrée')
-                
-            # Add a feature in the sink
-            sink.addFeature(feature, QgsFeatureSink.FastInsert)
+
+            print('Avant traitement')
+
+            # On calcule la longueur de la ligne.
+            geom = feature.geometry()
+            length = geom.length()
+            # Objet pour stocker les features points crées.
+            feats = []
+            # Calculer la distance qui sépare les pts
+            distEqua = length / count
+            # Ajouter le 1er pt aléatoirement
+            locPt = random.uniform(0, distEqua)
+            point = geom.interpolate(locPt)
+            fet = QgsFeature()
+            output_id += 1
+            fet.setAttributes([output_id])
+            fet.setGeometry(point)
+            # Add a point in the sink
+            sink.addFeature(fet, QgsFeatureSink.FastInsert)
+            # Ajouter les autres points equidistants
+            count2 = count - 1
+            while count2 != 0:
+                output_id += 1
+                locPt = locPt + distEqua
+                pointE = geom.interpolate(locPt)
+                count2 = count2 - 1
+                fet = QgsFeature()
+                fet.setAttributes([output_id])
+                fet.setGeometry(pointE)
+                # Add a point in the sink
+                sink.addFeature(fet, QgsFeatureSink.FastInsert)
 
             # Update the progress bar
             feedback.setProgress(int(current * total))

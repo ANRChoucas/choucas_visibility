@@ -73,6 +73,7 @@ class Choucas_visibilityProvider(QgsProcessingProvider):
         """
         Loads all algorithms belonging to this provider.
         """
+        # Algos du groupe visibilite_passive_stage
         self.addAlgorithm(Choucas_visibilityAlgorithm())
         self.addAlgorithm(ViewshedPoints())
         self.addAlgorithm(ViewshedRaster())
@@ -80,7 +81,9 @@ class Choucas_visibilityProvider(QgsProcessingProvider):
         self.addAlgorithm(HorizonDepth())
         self.addAlgorithm(Choucas_visibilityAlgorithm_mns())
         self.addAlgorithm(PassiveViewshed_Pt_MNS())
+        # Algos du groupe visibilite_surface_partielle
         self.addAlgorithm(Algo1())
+        # Algos du groupe visibilite_passive_reprise_pir
         self.addAlgorithm(AlgoReprise())
         # add additional algorithms here
         # self.addAlgorithm(MyOtherAlgorithm())
