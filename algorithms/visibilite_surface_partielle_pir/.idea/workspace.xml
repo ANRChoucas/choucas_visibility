@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="509ca677-ad46-4f4f-8de4-d70eae11b94c" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/../../Choucas_visibility_provider.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../Choucas_visibility_provider.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/algo1.py" beforeDir="false" afterPath="$PROJECT_DIR$/algo1.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -16,6 +17,9 @@
   </component>
   <component name="ProjectId" id="1UWIyy8LnlRh2pGIsnCddaKIGRL" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="PropertiesComponent">
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../.." />
+  </component>
   <component name="RunDashboard">
     <option name="ruleStates">
       <list>
@@ -46,10 +50,23 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/algo2.py</url>
+          <line>33</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

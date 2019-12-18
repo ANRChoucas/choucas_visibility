@@ -50,6 +50,7 @@ from .algorithms.visibilite_passive_stage.Passive_viewshed_pt_dem import Passive
 from .algorithms.visibilite_passive_stage.Passive_viewshed_pt_dem_mns import PassiveViewshed_Pt_MNS
 # Algos visibilite surface partielle
 from .algorithms.visibilite_surface_partielle_pir.algo1 import Algo1
+from .algorithms.visibilite_surface_partielle_pir.algo2 import Algo2
 # Algos visibilite partielle reprise
 from .algorithms.visibilite_passive_reprise.algo_reprise import AlgoReprise
 
@@ -83,6 +84,7 @@ class Choucas_visibilityProvider(QgsProcessingProvider):
         self.addAlgorithm(PassiveViewshed_Pt_MNS())
         # Algos du groupe visibilite_surface_partielle
         self.addAlgorithm(Algo1())
+        self.addAlgorithm(Algo2())
         # Algos du groupe visibilite_passive_reprise_pir
         self.addAlgorithm(AlgoReprise())
         # add additional algorithms here
