@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="509ca677-ad46-4f4f-8de4-d70eae11b94c" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../../Choucas_visibility_provider.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../Choucas_visibility_provider.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/algo1.py" beforeDir="false" afterPath="$PROJECT_DIR$/algo1.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/algo2.py" beforeDir="false" afterPath="$PROJECT_DIR$/algo2.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

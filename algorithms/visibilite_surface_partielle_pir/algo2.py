@@ -35,6 +35,7 @@ import os
 import processing
 from qgis.PyQt.QtCore import (QCoreApplication,QVariant)
 from qgis.core import (QgsProcessing,
+                       QgsProcessingMultiStepFeedback,
                        QgsFeatureSink,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFeatureSource,
@@ -47,7 +48,15 @@ from qgis.core import (QgsProcessing,
                        QgsField,
                        QgsFields,
                        QgsWkbTypes,
-                       QgsVectorLayer)
+                       QgsVectorLayer,
+                       QgsProject,
+                       QgsProcessingParameterVectorLayer,
+                       QgsProcessingParameterVectorDestination,
+                       QgsProcessingOutputFolder,
+                       QgsProcessingOutputFile,
+                       QgsProcessingParameterFolderDestination,
+                       QgsRasterLayer,
+                       )
 
 
 class Algo2(QgsProcessingAlgorithm):
@@ -70,9 +79,9 @@ class Algo2(QgsProcessingAlgorithm):
 
     INPUT = 'INPUT'
     INPUT_MNT='INPUT_MNT'
-    OUTPUT = 'OUTPUT'
-    OUTPUT_DBH = 'OUTPUT_DBH'
-    OUTPUT_PASSIVE = 'OUTPUT_PASSIVE'
+    OUTPUT = 'OUTPUT_VIEWPOINTS'
+    OUTPUT_FOLDER = 'OUTPUT_FOLDER'
+
 
     def initAlgorithm(self, config):
         """
@@ -82,7 +91,7 @@ class Algo2(QgsProcessingAlgorithm):
 
         # We add the input vector features source.
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
+            QgsProcessingParameterVectorLayer(
                 self.INPUT,
                 self.tr('Couche de point'),
                 [QgsProcessing.TypeVectorPoint]
@@ -100,59 +109,60 @@ class Algo2(QgsProcessingAlgorithm):
         # algorithm is run in QGIS).
         #Couche de points de vue
         self.addParameter(
-            QgsProcessingParameterFeatureSink(
+            QgsProcessingParameterVectorDestination(
                 self.OUTPUT,
                 self.tr('Couche point de vue ')
             )
         )
-        ## OUTPUT_DBH
+        ## OUTPUT_FOLDER dossier pour les outputs
         self.addParameter(
-            QgsProcessingParameterRasterDestination(
-                self.OUTPUT_DBH,
-                "OUTPUT_DBH", None, False))
-        ##OUTPUT_PASSIVE
-        self.addParameter(
-            QgsProcessingParameterRasterDestination(
-                self.OUTPUT_PASSIVE,
-                self.tr('OUTPUT_PASSIVE')))
+            QgsProcessingParameterFolderDestination(
+                self.OUTPUT_FOLDER,
+                "Dossier pour stocker les DBHs et les zones de visibilité"))
 
-    def processAlgorithm(self, parameters, context, feedback):
+
+    def processAlgorithm(self, parameters, context, model_feedback):
         """
         Here is where the processing itself takes place.
         """
         # Retrieve the feature source and sink. The 'dest_id' variable is used
         # to uniquely identify the feature sink, and must be included in the
         # dictionary returned by the processAlgorithm function.
-        source = self.parameterAsSource(parameters, self.INPUT, context)
-        MNT = self.parameterAsRasterLayer(parameters, self.INPUT_MNT, context)
 
-        # La couche de sortie est une couche point avec un champ ID
-        output_fields = QgsFields()
-        #output_fields.append(QgsField("ID", QVariant.Int))
-        #output_fields.append(QgsField("observ_hgt", QVariant.Double))
-        #output_fields.append(QgsField("raduis", QVariant.Double))
-        (sink, dest_id) = self.parameterAsSink(parameters, self.OUTPUT,
-                context, output_fields , QgsWkbTypes.Point , source.sourceCrs())
+        #couches en entrée
+        points = self.parameterAsVectorLayer(parameters,self.INPUT, context)
+        mnt = self.parameterAsRasterLayer(parameters,self.INPUT_MNT, context)
+
+        # couche de points de vue
+        output_viewpoints = self.parameterAsOutputLayer(parameters, "OUTPUT_VIEWPOINTS", context)
+        output_folder=self.parameterAsFile(parameters,"OUTPUT_FOLDER",context)
+
+
+
 
         # Compute the number of steps to display within the progress bar and
         # get features from source
-        total = 100.0 / source.featureCount() if source.featureCount() else 0
+        total = 100.0 / points.featureCount() if points.featureCount() else 0
 
-        #Définir les couches
-        features = source.getFeatures()
 
-        input_path = parameters['INPUT']
-        print(input_path)
-        output_path = parameters['OUTPUT']
-        print(output_path)
+        print('Avant traitement')
 
-        #input_layer=QgsVectorLayer(input_path)
-        #pts_vue_output = QgsVectorLayer(output_path,"output_layer","ogr")
+        # variables propres à Processing
+        feedback = QgsProcessingMultiStepFeedback(
+            points.featureCount() * 2, model_feedback
+        )
 
-        #The input parameters can be accessed as a dictionary object so parameters['INPUT'] will give the  path to a layer
-        sink=processing.run("Choucas:Création de point de vue",
-                       {'OBSERVER_POINTS': input_path,
-                        'DEM': MNT,
+        # Verification d'u attribut ID
+        if points.fields().indexOf("ID") < 0:
+            feedback.reportError(
+                "Les points doivent avoir un attribut numérique ID unique", True,
+            )
+            return {}
+
+        #lancer l'algorithm de création des points de vue
+        result=processing.runAndLoadResults("Choucas:Création de point de vue",
+                       {'OBSERVER_POINTS': points,
+                        'DEM': mnt,
                         'OBSERVER_ID': 'ID',
                         'RADIUS': 5000,
                         'RADIUS_FIELD': None,
@@ -160,10 +170,64 @@ class Algo2(QgsProcessingAlgorithm):
                         'OBS_HEIGHT_FIELD': None,
                         'TARGET_HEIGHT': 0,
                         'TARGET_HEIGHT_FIELD': None,
-#                        'OUTPUT': QgsProcessingOutputLayerDefinition(output_path)})['OUTPUT']
-                        'OUTPUT': output_path})['OUTPUT']
+                        'OUTPUT': output_viewpoints})['OUTPUT']
 
-        #sink.addFeature(out['OUTPUT'], QgsFeatureSink.FastInsert)
+        print(result)
+        layer_viewPoints = QgsVectorLayer(result, 'test', "ogr")
+        print(layer_viewPoints.isValid())
+        QgsProject.instance().addMapLayer(layer_viewPoints)
+
+        #nombre de point de vue
+        pts_count = layer_viewPoints.featureCount()
+        print(pts_count)
+
+        #définir la liste des zones de visibilités
+        liste_VisiPass=[]
+
+        #Lancer l'algo de calcul de DBH et de zones de visibilité
+        for i in range(0,pts_count):
+            # input
+            partie1 = result + "|layerid=0|subset=\"ID\" = \'"
+            point_obs_id = partie1 + str(i+1) + "\'"
+
+            # output
+
+            dbh_output = output_folder + '/DBH' + str(i+1) + '.tif'
+            passive_output = output_folder + '/Passive' + str(i+1) + '.tif'
+
+
+            processing.run(
+                "Choucas:Calcul de la vision active, passive et le raster depth below horizon à partir du point d observation et du MNT ",
+                {'OBSERVER_POINTS': point_obs_id,
+                 'Hobs': 1.6,
+                 'DEM': mnt,
+                 'USE_CURVATURE': True,
+                 'REFRACTION': 0.13,
+                 'OUTPUT_DBH': dbh_output,
+                 'OUTPUT_PASSIVE': passive_output})
+
+            # Ajouter les rasters dans la liste
+            raster = QgsRasterLayer(passive_output, 'passive');
+            liste_VisiPass.append(raster)
+
+        print(liste_VisiPass)
+        #Concatenation par calculatrice raster
+        output_Visi_Pts = output_folder + '/Concatenation_Visi_Passive_Pts.tif';
+        #Cas n=3
+
+        if len(liste_VisiPass)==3:
+            parameters = {'INPUT_A': liste_VisiPass[0],
+                          'INPUT_B': liste_VisiPass[1],
+                          'INPUT_C': liste_VisiPass[2],
+                          'BAND_A': 1,
+                          'BAND_B': 1,
+                          'BAND_C': 1,
+                          'FORMULA': '(A * B * C )', #  expression here.
+                          'OUTPUT': output_Visi_Pts}
+
+            processing.runAndLoadResults('gdal:rastercalculator', parameters)
+
+        print('Après traitement')
         """
         for current, feature in enumerate(features):
             # Stop the algorithm if cancel button has been clicked
@@ -176,7 +240,7 @@ class Algo2(QgsProcessingAlgorithm):
             # par la variable contenant l'objet en sortie
             # Pour l'instant on met juste un petit message pour dire qu'on passe par là
 
-            print('Avant traitement')
+            
 
 
             # Update the progress bar
@@ -190,7 +254,7 @@ class Algo2(QgsProcessingAlgorithm):
         # dictionary, with keys matching the feature corresponding parameter
         # or output names.
         #return {self.OUTPUT: dest_id}
-        return {self.OUTPUT:sink}
+        return {self.OUTPUT:layer_viewPoints}
 
     def name(self):
         """
