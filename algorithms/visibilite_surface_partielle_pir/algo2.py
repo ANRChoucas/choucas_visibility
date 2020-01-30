@@ -227,6 +227,23 @@ class Algo2(QgsProcessingAlgorithm):
 
             processing.runAndLoadResults('gdal:rastercalculator', parameters)
 
+        if len(liste_VisiPass)==5:
+            parameters = {'INPUT_A': liste_VisiPass[0],
+                          'INPUT_B': liste_VisiPass[1],
+                          'INPUT_C': liste_VisiPass[2],
+                          'INPUT_D': liste_VisiPass[3],
+                          'INPUT_E': liste_VisiPass[4],
+                          'BAND_A': 1,
+                          'BAND_B': 1,
+                          'BAND_C': 1,
+                          'BAND_D': 1,
+                          'BAND_E': 1,
+                          'FORMULA': '(A * B * C * D * E)', #  expression here.
+                          'OUTPUT': output_Visi_Pts}
+
+            processing.runAndLoadResults('gdal:rastercalculator', parameters)
+
+
         print('Après traitement')
         """
         for current, feature in enumerate(features):
