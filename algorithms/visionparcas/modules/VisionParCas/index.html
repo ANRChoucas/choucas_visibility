@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset=utf-8 />
+    <title>VisionParCas</title>
+    <link rel="stylesheet" type="text/css" href="style.css" media="screen">
+    <!-- import de leaflet -->
+    <script src="leaflet/leaflet.js"></script>
+    <link href="leaflet/leaflet.css" rel="stylesheet" />
+    <!-- import de la fonction FullScreen -->
+    <script src='js/leaflet.fullscreen.js'></script>
+    <link href='css/leaflet.fullscreen.css' rel='stylesheet' />
+    <!-- import de la synchronisation des maps leaflet-->
+    <script src="js/L.Map.Sync.js"></script>
+    <!-- import de georaster-layer-for-leaflet : affichage de raster .tiff-->
+    <script src="js/georaster.browser.bundle.min.js"></script>
+    <script src="js/proj4.js"></script>
+    <script src="js/georaster-layer-for-leaflet.browserify.min.js"></script>
+    <!-- import de la bibliothèque geotiff -->
+    <script src="js/geotiff.js"></script>
+    <!-- import de la bibliothèque geopackage -->
+    <!-- <script src="https://unpkg.com/@ngageoint/leaflet-geopackage@2.0.5/dist/leaflet-geopackage.min.js"></script> -->
+  </head>
+  <body>
+    <div class="grille">
+      <div class="entetegauche">
+        <h1>Analyse des bassins de visibilité</h1>
+        <input type="file" id="input"/>
+        <p>*Uniquement les fichiers .json et .tif sont acceptés (EPSG:3857)</p>
+      </div>
+
+      <div class="entetedroite" id="entetedroite">
+        <img src="img/logo.svg" class="logo">
+      </div>
+
+      <div id="stat"></div>
+
+      <div id='map1'></div>
+      <div id='map2'></div>
+    </div>
+  </body>
+  <script src="script.js"></script>
+</html>

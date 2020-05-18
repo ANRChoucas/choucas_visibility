@@ -53,7 +53,12 @@ from .algorithms.visibilite_surface_partielle_pir.algo1 import Algo1
 from .algorithms.visibilite_surface_partielle_pir.algo2 import Algo2
 # Algos visibilite partielle reprise
 from .algorithms.visibilite_passive_reprise.algo_reprise import AlgoReprise
-
+#Algos VisionParCas
+from .algorithms.visionparcas.observedPoint import ObservedPoint
+from .algorithms.visionparcas.visibilitePassive import VisibilitePassive
+from .algorithms.visionparcas.constructPtsAleatoires import ConstructPointsAleatoires
+from .algorithms.visionparcas.varMultiParametres import VarMultiParametres
+from .algorithms.visionparcas.ecritureParaSursol import CreateCsvSursol
 
 class Choucas_visibilityProvider(QgsProcessingProvider):
 
@@ -87,7 +92,14 @@ class Choucas_visibilityProvider(QgsProcessingProvider):
         self.addAlgorithm(Algo2())
         # Algos du groupe visibilite_passive_reprise_pir
         self.addAlgorithm(AlgoReprise())
+        # Algos du groupe visionparcas
+        self.addAlgorithm(ObservedPoint())
+        self.addAlgorithm(VisibilitePassive())
+        self.addAlgorithm(ConstructPointsAleatoires())
+        self.addAlgorithm(VarMultiParametres())
+        self.addAlgorithm(CreateCsvSursol())
         # add additional algorithms here
+
         # self.addAlgorithm(MyOtherAlgorithm())
 
     def id(self):
