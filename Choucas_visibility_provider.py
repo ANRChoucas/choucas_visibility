@@ -57,7 +57,9 @@ from .algorithms.visibilite_passive_reprise.algo_reprise import AlgoReprise
 from .algorithms.visionparcas.observedPoint import ObservedPoint
 from .algorithms.visionparcas.visibilitePassive import VisibilitePassive
 from .algorithms.visionparcas.constructPtsAleatoires import ConstructPointsAleatoires
+from .algorithms.visionparcas.constructPtsAleatoiresKm import ConstructPointsAleatoiresKm
 from .algorithms.visionparcas.varMultiParametres import VarMultiParametres
+from .algorithms.visionparcas.ProjetAnalyseSpatiale import ProjetAnalyseSpatiale
 from .algorithms.visionparcas.ecritureParaSursol import CreateCsvSursol
 
 class Choucas_visibilityProvider(QgsProcessingProvider):
@@ -96,7 +98,9 @@ class Choucas_visibilityProvider(QgsProcessingProvider):
         self.addAlgorithm(ObservedPoint())
         self.addAlgorithm(VisibilitePassive())
         self.addAlgorithm(ConstructPointsAleatoires())
+        self.addAlgorithm(ConstructPointsAleatoiresKm())
         self.addAlgorithm(VarMultiParametres())
+        self.addAlgorithm(ProjetAnalyseSpatiale())
         self.addAlgorithm(CreateCsvSursol())
         # add additional algorithms here
 
